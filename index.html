@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart-Letters Controller</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f2f5; padding: 50px; }
+        .btn { padding: 20px 40px; margin: 10px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; color: white; transition: 0.3s; }
+        .alphabet { background: #3498db; } .numbers { background: #e67e22; }
+        .shapes { background: #9b59b6; } .colors { background: #2ecc71; }
+        .btn:hover { opacity: 0.8; transform: scale(1.05); }
+        #status { margin-top: 20px; font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <h1>Smart-Letters System</h1>
+    <div id="status">Current Mode: ALPHABET</div>
+    <button class="btn alphabet" onclick="setMode('alphabet')">ALPHABET</button>
+    <button class="btn numbers" onclick="setMode('number')">NUMBERS (1-10)</button>
+    <button class="btn shapes" onclick="setMode('shape')">SHAPES</button>
+    <button class="btn colors" onclick="setMode('color')">COLORS</button>
+
+    <script>
+        const socket = io();
+        function setMode(mode) {
+            socket.emit('change_category', mode);
+            document.getElementById('status').innerText = "Current Mode: " + mode.toUpperCase();
+        }
+    </script>
+</body>
+</html>
