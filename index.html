@@ -39,7 +39,13 @@
 
         // For Vercel deployment, set backend URL in input and click Save.
         const socketBase = storedBackend || queryBackend || window.location.origin;
-        const socket = io(socketBase, { transports: ['websocket', 'polling'] });
+        const socket = io(socketBase, {
+            transports: ['polling'],
+            upgrade: false,
+            reconnection: true,
+            reconnectionAttempts: 20,
+            reconnectionDelay: 1000
+        });
 
         socket.on('connect', () => {
             connLabel.innerText = 'Socket: Connected to ' + socketBase;
