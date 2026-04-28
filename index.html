@@ -10,18 +10,55 @@
         .shapes { background: #9b59b6; } .colors { background: #2ecc71; }
         .btn:hover { opacity: 0.8; transform: scale(1.05); }
         #status { margin-top: 20px; font-weight: bold; color: #2c3e50; }
+        #conn { margin-top: 10px; font-size: 14px; color: #374151; }
+        .cfg { margin: 16px 0; }
+        .cfg input { padding: 8px; width: min(90vw, 420px); }
+        .cfg button { padding: 8px 12px; margin-left: 6px; }
     </style>
 </head>
 <body>
     <h1>Smart-Letters System</h1>
     <div id="status">Current Mode: ALPHABET</div>
+    <div id="conn">Socket: Connecting...</div>
+    <div class="cfg">
+        <input id="backendUrl" placeholder="https://your-backend-url.trycloudflare.com">
+        <button onclick="saveBackend()">Save Backend URL</button>
+    </div>
     <button class="btn alphabet" onclick="setMode('alphabet')">ALPHABET</button>
     <button class="btn numbers" onclick="setMode('number')">NUMBERS (1-10)</button>
     <button class="btn shapes" onclick="setMode('shape')">SHAPES</button>
     <button class="btn colors" onclick="setMode('color')">COLORS</button>
 
     <script>
-        const socket = io();
+        const storedBackend = localStorage.getItem('backend_url');
+        const queryBackend = new URLSearchParams(window.location.search).get('backend');
+        const backendInput = document.getElementById('backendUrl');
+        const connLabel = document.getElementById('conn');
+
+        backendInput.value = storedBackend || queryBackend || '';
+
+        // For Vercel deployment, set backend URL in input and click Save.
+        const socketBase = storedBackend || queryBackend || window.location.origin;
+        const socket = io(socketBase, { transports: ['websocket', 'polling'] });
+
+        socket.on('connect', () => {
+            connLabel.innerText = 'Socket: Connected to ' + socketBase;
+        });
+
+        socket.on('connect_error', (err) => {
+            connLabel.innerText = 'Socket: Connection failed (' + err.message + ')';
+        });
+
+        function saveBackend() {
+            const val = backendInput.value.trim();
+            if (!val) {
+                alert('Enter backend URL first.');
+                return;
+            }
+            localStorage.setItem('backend_url', val);
+            alert('Saved. Refresh page to reconnect.');
+        }
+
         function setMode(mode) {
             socket.emit('change_category', mode);
             document.getElementById('status').innerText = "Current Mode: " + mode.toUpperCase();
